@@ -24,7 +24,7 @@ func (model *UserModel) List() schema.Users {
 
 func (model *UserModel) Create(user schema.User) error {
 
-	_, err := model.collection.InsertOne(context.Background(), user)
+	_, err := model.collection.InsertOne(context.Background(), user.HashPassword())
 
 	return err
 }

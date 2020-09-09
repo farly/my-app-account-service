@@ -8,10 +8,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"reflect"
-	"strings"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
 )
 
@@ -49,6 +46,8 @@ func (accountRouter *AccountRoute) CreateAccount(w http.ResponseWriter, r *http.
 		util.ToJSON(server.Fail{Ok: false}, w)
 	}
 
+	// payload user.. generate token
+
 	w.WriteHeader(http.StatusOK)
 	util.ToJSON(server.Success{Ok: true}, w)
 }
@@ -66,39 +65,16 @@ func Validate(next http.Handler) http.Handler {
 		}
 
 		// move this out so this would be resuable
-		var validate = validator.New()
-		// this registers the json fieldname
-		validate.RegisterTagNameFunc(func(fld reflect.StructField) string {
-			name := strings.SplitN(fld.Tag.Get("json"), ",", 2)[0]
-			if name == "-" {
-				return ""
-			}
-			return name
-		})
-		// end
-		err = validate.Struct(user)
+		var validate = util.NewValidate()
 
-		if err != nil {
-			formattedErrs := make(map[string]string)
+		errors := validate.Validate(user)
+
+		if len(errors) > 0 {
 			w.WriteHeader(http.StatusBadRequest)
-
-			errs := err.(validator.ValidationErrors)
-
-			for _, err := range errs {
-				// cast the FieldError into our ValidationError and append to the slice
-				ve := err.(validator.FieldError)
-				// fmtErr := fmt.Sprintf(
-				// 	"Field validation for '%s' failed on the '%s' tag",
-				// 	ve.Field(),
-				// 	ve.Tag(),
-				// )
-				// formattedErrs = append(formattedErrs, fmtErr)
-				formattedErrs[ve.Field()] = ve.Tag()
-			}
 
 			util.ToJSON(server.Fail{
 				Ok:     false,
-				Errors: formattedErrs,
+				Errors: errors,
 			}, w)
 			return
 		}

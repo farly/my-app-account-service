@@ -2,10 +2,13 @@ package accounts
 
 import (
 	models "accounts/models"
+
+	"github.com/go-redis/redis"
 )
 
 type Context struct {
 	UserModel *models.UserModel
+	Rdb       *redis.Client
 }
 
 // leave this for now
