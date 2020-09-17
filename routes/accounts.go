@@ -1,12 +1,11 @@
 package accounts
 
 import (
+	models "accounts/datastore/models"
 	schema "accounts/datastore/schema"
-	models "accounts/models"
 	server "accounts/server"
 	util "accounts/utils"
 	"context"
-	"fmt"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -24,16 +23,10 @@ func NewAccountRoute(router *mux.Router, userModel *models.UserModel) *AccountRo
 }
 
 func (accountRouter *AccountRoute) SetupRoutes() {
-	accountRouter.router.HandleFunc("/accounts", ListAccount).Methods(http.MethodGet)
-
 	createAccountRoute := accountRouter.router.Methods(http.MethodPost).Subrouter()
 	createAccountRoute.HandleFunc("/accounts", accountRouter.CreateAccount).Methods(http.MethodPost)
 	createAccountRoute.Use(Validate)
 
-}
-
-func ListAccount(response http.ResponseWriter, request *http.Request) {
-	fmt.Fprint(response, "List Accounts")
 }
 
 func (accountRouter *AccountRoute) CreateAccount(w http.ResponseWriter, r *http.Request) {
@@ -44,6 +37,7 @@ func (accountRouter *AccountRoute) CreateAccount(w http.ResponseWriter, r *http.
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		util.ToJSON(server.Fail{Ok: false}, w)
+		return
 	}
 
 	// payload user.. generate token
@@ -61,24 +55,27 @@ func Validate(next http.Handler) http.Handler {
 
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
-			util.ToJSON(server.Fail{Ok: false}, w)
+			util.ToJSON(server.Fail{
+				Ok: false,
+				Errors: map[string]string{
+					"body": "required",
+				},
+			}, w)
+			return
 		}
 
-		// move this out so this would be resuable
 		var validate = util.NewValidate()
 
 		errors := validate.Validate(user)
 
 		if len(errors) > 0 {
 			w.WriteHeader(http.StatusBadRequest)
-
 			util.ToJSON(server.Fail{
 				Ok:     false,
 				Errors: errors,
 			}, w)
 			return
 		}
-
 		ctx := context.WithValue(r.Context(), KeyUser{}, *user)
 		r = r.WithContext(ctx)
 

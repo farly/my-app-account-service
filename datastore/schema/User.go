@@ -24,4 +24,12 @@ func (user *User) HashPassword() *User {
 	return user
 }
 
+func (user *User) IsAuthorized(password string) bool {
+	bytePassword := []byte(user.Password)
+	plainPassword := []byte(password)
+	err := bcrypt.CompareHashAndPassword(bytePassword, plainPassword)
+
+	return (err == nil)
+}
+
 type Users []User

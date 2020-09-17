@@ -7,9 +7,10 @@ import (
 )
 
 func SetUpRoutes(router *mux.Router, context *server.Context) {
-	var mainRoute = NewMainRoute(router)
-	mainRoute.SetupRoutes()
 
 	var accountsRoute = NewAccountRoute(router, context.UserModel)
 	accountsRoute.SetupRoutes()
+
+	var loginRoute = NewLoginRoute(router, context.UserModel)
+	loginRoute.SetupRoutes()
 }

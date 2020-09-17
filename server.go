@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"time"
 
-	models "accounts/models"
+	models "accounts/datastore/models"
 	routes "accounts/routes"
 	server "accounts/server"
 	util "accounts/utils"
@@ -39,7 +39,7 @@ func main() {
 	}
 
 	rdb := redis.NewClient(&redis.Options{
-		Addr:     "0.0.0.0:6379", // use default Addr
+		Addr:     "0.0.0.0:6370", // use default Addr
 		Password: "",             // no password set
 		DB:       0,              // use default DB
 	})

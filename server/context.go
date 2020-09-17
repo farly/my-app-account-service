@@ -1,7 +1,7 @@
 package accounts
 
 import (
-	models "accounts/models"
+	models "accounts/datastore/models"
 
 	"github.com/go-redis/redis"
 )
@@ -13,7 +13,8 @@ type Context struct {
 
 // leave this for now
 type Success struct {
-	Ok bool `json:"ok"`
+	Ok    bool   `json:"ok"`
+	Token string `json:"token,omitempty"`
 }
 
 // leave it for now
