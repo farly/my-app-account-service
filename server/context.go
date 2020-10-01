@@ -22,3 +22,9 @@ type Fail struct {
 	Ok     bool              `json:"ok"`
 	Errors map[string]string `json:"errors,omitempty"`
 }
+
+// leave this for now
+type AuthenticationSuccess struct {
+	Ok bool `json:"ok"`
+	Token string `json:"token"`
+}

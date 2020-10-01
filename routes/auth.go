@@ -7,6 +7,7 @@ import (
 	util "accounts/utils"
 	"net/http"
 
+	"github.com/dgrijalva/jwt-go"
 	"github.com/gorilla/mux"
 )
 
@@ -48,10 +49,35 @@ func (loginRouter *LoginRoute) Login(w http.ResponseWriter, r *http.Request) {
 		util.ToJSON(server.Fail{
 			Ok: false,
 		}, w)
+		return
 	}
 
 	isAuthorized := user.IsAuthorized(auth.Password)
 
+	if !isAuthorized {
+		w.WriteHeader(http.StatusForbidden)
+		util.ToJSON(server.Fail{Ok: false}, w)
+		return
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"id": user.ID,
+	})
+	tokenString, err := token.SignedString([]byte("jalsdfjskdfjalfasjfalsfjaslf"))
+
+	if err != nil {
+		w.WriteHeader(http.StatusOK)
+		util.ToJSON(server.AuthenticationSuccess{
+			Ok:    isAuthorized,
+			Token: err.Error(),
+		}, w)
+		return
+		// log fatal error here
+	}
+
 	w.WriteHeader(http.StatusOK)
-	util.ToJSON(server.Success{Ok: isAuthorized}, w)
+	util.ToJSON(server.AuthenticationSuccess{
+		Ok:    isAuthorized,
+		Token: tokenString,
+	}, w)
 }
