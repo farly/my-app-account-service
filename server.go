@@ -9,7 +9,8 @@ import (
 	models "accounts/datastore/models"
 	routes "accounts/routes"
 	server "accounts/server"
-	util "accounts/utils"
+
+	//util "accounts/utils"
 
 	"github.com/go-redis/redis"
 	"github.com/gorilla/mux"
@@ -39,7 +40,7 @@ func main() {
 	}
 
 	rdb := redis.NewClient(&redis.Options{
-		Addr:     "0.0.0.0:6370", // use default Addr
+		Addr:     "0.0.0.0:6379", // use default Addr
 		Password: "",             // no password set
 		DB:       0,              // use default DB
 	})
@@ -66,8 +67,7 @@ func main() {
 		})
 	})
 
-	publisher := util.NewPublisher(rdb)
-	publisher.Publish("create.user", "server started")
+	//publisher := util.NewPublisher(rdb)
 	// merge router and models into one context?
 	routes.SetUpRoutes(router, context)
 
